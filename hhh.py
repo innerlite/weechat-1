@@ -111,6 +111,26 @@ def priv_cb(data, signal, signal_data):
 weechat.hook_signal('*,irc_in2_privmsg', 'priv_cb', '')
 
 def join_cb(data, signal, signal_data):
+
+    global users
+
+    args = signal_data.split(' ')[0:3]
+    server = signal.split(",")[0]
+    msg = weechat.info_get_hashtable("irc_message_parse", {"message": signal_data})
+    buffer = weechat.info_get("irc_buffer", "%s,%s" % (server, msg["channel"]))
+    nick = args[0][1:].split('!')[0]
+    host = args[0][1:].split('!')[1].split('@')[1]
+    target = args[2][1:]
+	
+    if any(host in u for u in users):
+        weechat.command(buffer, '/wait 7 /mode ' + target + ' ' + '+o' + ' ' + nick)
+
+    return weechat.WEECHAT_RC_OK
+
+weechat.hook_signal('*,irc_in2_join', 'join_cb', '')
+
+'''
+def join_cb(data, signal, signal_data):
     server = signal.split(",")[0]
     msg = weechat.info_get_hashtable("irc_message_parse", {"message": signal_data})
     buffer = weechat.info_get("irc_buffer", "%s,%s" % (server, msg["channel"]))
@@ -120,5 +140,4 @@ def join_cb(data, signal, signal_data):
         if greet:
             weechat.command(buffer, 'для здоровья!')
     return weechat.WEECHAT_RC_OK
-
-weechat.hook_signal('*,irc_in2_join', 'join_cb', '')
+'''
